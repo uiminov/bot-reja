@@ -2,7 +2,6 @@ import sys
 import os
 import asyncio
 import logging
-import psutil, os
 
 process = psutil.Process(os.getpid())
 print(process.memory_info().rss / 1024 / 1024, "MB")
@@ -36,4 +35,5 @@ async def main():
     )
 
 if __name__ == "__main__":
+
     asyncio.run(main())
