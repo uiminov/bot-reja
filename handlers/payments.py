@@ -14,7 +14,7 @@ CLICK_SERVICE_ID = 94950
 CLICK_MERCHANT_ID = 55254
 CLICK_SECRET_KEY = "ZlxY9xXrErDmTRb"
 CLICK_MERCHANT_USER_ID = 77127
-CLICK_RETURN_URL = "https://t.me/твой_бот_username"  # ← замени на реальную
+CLICK_RETURN_URL = "https://t.me/твой_бот_username"  # ← замени на реальную ссылку на бота
 
 router = Router(name="payments")
 
@@ -32,7 +32,7 @@ async def process_buy(callback: CallbackQuery):
         amount = product['price']
         payload = choice
 
-    # Формируем подпись
+    # Формируем подпись (по документации Click)
     sign_string = f"{amount * 100}{CLICK_SERVICE_ID}{CLICK_MERCHANT_ID}{CLICK_SECRET_KEY}"
     import hashlib
     signature = hashlib.md5(sign_string.encode('utf-8')).hexdigest()
@@ -42,13 +42,13 @@ async def process_buy(callback: CallbackQuery):
         f"https://my.click.uz/services/pay?"
         f"service_id={CLICK_SERVICE_ID}&"
         f"merchant_id={CLICK_MERCHANT_ID}&"
-        f"amount={amount * 100}&"  # в тиынах
+        f"amount={amount * 100}&"  # в тиынах (сум * 100)
         f"transaction_param={payload}&"
         f"merchant_user_id={CLICK_MERCHANT_USER_ID}&"
         f"sign={signature}"
     )
 
-    # Правильное создание клавиатуры (именованные аргументы!)
+    # Правильная клавиатура (именованный аргумент inline_keyboard)
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton("💳 Оплатить через Click", url=payment_url)],
@@ -70,6 +70,6 @@ async def on_pre_checkout(pre_checkout: PreCheckoutQuery):
 
 @router.message(F.successful_payment)
 async def on_successful_payment(message: Message):
-    # Эта функция не нужна для Click, так как оплата проходит по внешней ссылке
+    # Для Click эта функция не нужна (оплата по внешней ссылке)
     # Если хочешь оставить — удали или закомментируй
     pass
