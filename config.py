@@ -4,12 +4,15 @@ from typing import Dict, Any
 BOT_TOKEN = '8118513719:AAFPxYxAf5uqmJEM-l7ho26q-8UMBoDancA'
 PROVIDER_TOKEN = '398062629:TEST:999999999_F91D8F69C042267444B74CC0B3C747757EB0E065'
 
+# Твои данные из вопроса
+CLICK_CONFIG = {
+    'service_id': '94950',
+    'merchant_id': '55254',
+    'secret_key': 'ZlxY9xXrErDmTRb',
+    'merchant_user_id': '77127',
+}
+
 CURRENCY = 'UZS'
-CLICK_SERVICE_ID = 94950
-CLICK_MERCHANT_ID = 55254
-CLICK_SECRET_KEY = "ZlxY9xXrErDmTRb"
-CLICK_MERCHANT_USER_ID = 77127
-CLICK_RETURN_URL = "https://t.me/Rejalarbot"  # или "https://t.me/твой_бот?start=paid"
 
 PLANNERS: Dict[str, Dict[str, Any]] = {
     'financial': {
@@ -55,7 +58,7 @@ PLANNERS: Dict[str, Dict[str, Any]] = {
 }
 
 BUNDLE = {
-    'title': 'Aksiya: 3 po cene 2',
+    'title': '2 ta puliga 3 ta oling',
     'image_url': 'https://i.postimg.cc/q7JswHcx/3st1.png',
     'description': (
         "*✦🔥 2 ta puliga 3 ta oling ✦*\n\n"
