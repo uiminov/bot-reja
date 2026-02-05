@@ -1,46 +1,15 @@
 import hashlib
-import logging
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Request
 from aiogram import Bot
-from typing import Dict, Any
+from config import BOT_TOKEN, CLICK_CONFIG
+from utils.messages import get_success_message
 
-# --- КОНФИГУРАЦИЯ (Твои данные) ---
-BOT_TOKEN = '8118513719:AAFPxYxAf5uqmJEM-l7ho26q-8UMBoDancA'
-
-CLICK_CONFIG = {
-    'service_id': '94950',
-    'merchant_id': '55254',
-    'secret_key': 'ZlxY9xXrErDmTRb',
-    'merchant_user_id': '77127',
-}
-
-PLANNERS: Dict[str, Dict[str, Any]] = {
-    'financial': {
-        'title': 'Moliya trekeri',
-        'link': 'https://docs.google.com/spreadsheets/u/0/d/1ZuH-1hAW688AVW6GYfLHCAIFjiQGEa8lK5YZHsoxD8M/copy'
-    },
-    'task': {
-        'title': 'Vazifa trekeri',
-        'link': 'https://docs.google.com/spreadsheets/d/18yD2bVvdtTies8IaBiOu1O7lvXAENs3IaIT9x957Ago/copy'
-    },
-    'productivity': {
-        'title': 'Hosildorlik trekeri',
-        'link': 'https://docs.google.com/spreadsheets/d/1NHO1rvIF0fJSAgk0_HZEuE6n82AJ-AoNQB4fniD9jNU/copy'
-    }
-}
-
-BUNDLE = {
-    'title': 'Aksiya: 3 po cene 2',
-    'planners': ['financial', 'task', 'productivity']
-}
-
-# --- ИНИЦИАЛИЗАЦИЯ ---
 app = FastAPI()
 bot = Bot(token=BOT_TOKEN)
-logging.basicConfig(level=logging.INFO)
 
 def check_click_signature(params: dict, sign_string: str) -> bool:
-    """Проверка безопасности MD5 хеша"""
+    """Проверка безопасности: совпадает ли хеш запроса с нашим секретным ключом."""
+    # Порядок склейки строго по документации CLICK
     payload = (
         f"{params.get('click_trans_id')}{params.get('service_id')}"
         f"{CLICK_CONFIG['secret_key']}{params.get('merchant_trans_id')}"
@@ -69,11 +38,11 @@ async def click_webhook(
 
     # 1. Проверка подписи
     if not check_click_signature(params, sign_string):
-        logging.error("Sign check failed!")
         return {"error": "-1", "error_note": "SIGN CHECK FAILED"}
 
-    # 2. Логика PREPARE (Проверка существования заказа)
+    # 2. Логика PREPARE (Action = 0)
     if action == "0":
+        # Здесь можно добавить проверку: существует ли товар в PLANNERS
         return {
             "click_trans_id": click_trans_id,
             "merchant_trans_id": merchant_trans_id,
@@ -81,33 +50,16 @@ async def click_webhook(
             "error_note": "Success"
         }
 
-    # 3. Логика COMPLETE (Подтверждение оплаты)
+    # 3. Логика COMPLETE (Action = 1)
     if action == "1":
         if error == "0":
+            # Разбираем merchant_trans_id (мы его создали как "user_id:item_key")
             try:
-                # merchant_trans_id приходит в формате "user_id:item_key"
                 user_id, item_key = merchant_trans_id.split(':')
                 
-                # Собираем данные для сообщения
-                if item_key == 'bundle':
-                    title = BUNDLE['title']
-                    links_list = [f"• {PLANNERS[p]['title']}:\n{PLANNERS[p]['link']}" for p in BUNDLE['planners']]
-                    links_text = "\n\n".join(links_list)
-                else:
-                    product = PLANNERS.get(item_key)
-                    title = product['title'] if product else "Treker"
-                    links_text = product['link'] if product else "Havola topilmadi"
-
-                # Текст сообщения об успехе
-                success_message = (
-                    f"✅ <b>To'lov muvaffaqiyatli qabul qilindi!</b>\n\n"
-                    f"Mahsulot: <b>{title}</b>\n\n"
-                    f"Sizning havolalaringiz:\n{links_text}\n\n"
-                    f"<i>Eslatma: Havolani ochib 'Copy' (Nusxa olish) tugmasini bosing.</i>"
-                )
-
-                await bot.send_message(chat_id=user_id, text=success_message, parse_mode="HTML")
-                logging.info(f"Sent success message to {user_id}")
+                # Отправляем сообщение об успехе
+                text = get_success_message(item_key)
+                await bot.send_message(chat_id=user_id, text=text)
 
                 return {
                     "click_trans_id": click_trans_id,
@@ -116,8 +68,7 @@ async def click_webhook(
                     "error_note": "Success"
                 }
             except Exception as e:
-                logging.error(f"Error sending message: {e}")
-                return {"error": "-5", "error_note": "User notification failed"}
+                return {"error": "-5", "error_note": f"User notification failed: {e}"}
         
         return {"error": error, "error_note": error_note}
 
