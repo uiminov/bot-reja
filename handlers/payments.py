@@ -17,7 +17,7 @@ import aiohttp
 from config import (
     PLANNERS, BUNDLE, CURRENCY,
     CLICK_SERVICE_ID, CLICK_MERCHANT_ID, CLICK_SECRET_KEY, CLICK_MERCHANT_USER_ID,
-    CLICK_RETURN_URL, CLICK_BASE_URL
+    CLICK_RETURN_URL
 )
 from utils.messages import get_success_message
 from keyboards import get_main_menu
@@ -82,3 +82,4 @@ async def on_successful_payment(message: Message):
 
 # Для обработки возврата после оплаты (если используешь return_url)
 # Настрой webhook на сервере, если нужно обрабатывать статус оплаты
+
