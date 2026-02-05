@@ -1,5 +1,9 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
 
 from config import PLANNERS, BUNDLE, CURRENCY
 from utils.messages import get_success_message
@@ -10,7 +14,7 @@ CLICK_SERVICE_ID = 94950
 CLICK_MERCHANT_ID = 55254
 CLICK_SECRET_KEY = "ZlxY9xXrErDmTRb"
 CLICK_MERCHANT_USER_ID = 77127
-CLICK_RETURN_URL = "https://t.me/твой_бот_username"  # замени на свой
+CLICK_RETURN_URL = "https://t.me/твой_бот_username"  # ← замени на реальную
 
 router = Router(name="payments")
 
@@ -44,13 +48,28 @@ async def process_buy(callback: CallbackQuery):
         f"sign={signature}"
     )
 
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton("💳 Оплатить через Click", url=payment_url)],
-        [InlineKeyboardButton("⬅️ Ortga", callback_data="back_to_menu")]
-    ])
+    # Правильное создание клавиатуры (именованные аргументы!)
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton("💳 Оплатить через Click", url=payment_url)],
+            [InlineKeyboardButton("⬅️ Ortga", callback_data="back_to_menu")]
+        ]
+    )
 
     await callback.message.edit_text(
         f"Оплатите {amount:,} {CURRENCY} за {product['title']}\n\nПерейдите по кнопке ниже:",
         reply_markup=keyboard
     )
     await callback.answer()
+
+
+@router.pre_checkout_query()
+async def on_pre_checkout(pre_checkout: PreCheckoutQuery):
+    await pre_checkout.bot.answer_pre_checkout_query(pre_checkout.id, ok=True)
+
+
+@router.message(F.successful_payment)
+async def on_successful_payment(message: Message):
+    # Эта функция не нужна для Click, так как оплата проходит по внешней ссылке
+    # Если хочешь оставить — удали или закомментируй
+    pass
