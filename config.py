@@ -26,7 +26,7 @@ PLANNERS: Dict[str, Dict[str, Any]] = {
             "▪️*Narxi:* 69\\.000 UZS\n\n"
              "_Bir marta toʻlaysiz — cheklovlarsiz foydalanasiz_"
         ),
-        'price': 1000,
+        'price': 69000,
         'link': 'https://docs.google.com/spreadsheets/u/0/d/1ZuH-1hAW688AVW6GYfLHCAIFjiQGEa8lK5YZHsoxD8M/copy'
     },
     'task': {
