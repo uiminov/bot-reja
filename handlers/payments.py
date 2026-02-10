@@ -1,48 +1,37 @@
-from aiogram import Router, F, Bot
-from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery, Message
-from config import PROVIDER_TOKEN, CURRENCY, PLANNERS, BUNDLE
+from aiogram import Router, F
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from config import CLICK_CONFIG
 
 router = Router(name="payments")
 
 @router.callback_query(F.data.startswith('buy_'))
 async def process_buy(callback: CallbackQuery):
     choice = callback.data.split('_')[1]
+    user_id = callback.from_user.id
     
-    if choice == 'bundle':
-        title = BUNDLE['title']
-        description = "Paket: 3 ta planer"
-        price = BUNDLE['price']
-    else:
-        title = PLANNERS[choice]['title']
-        description = "Elektron planer"
-        price = PLANNERS[choice]['price']
+    # Определяем цену
+    amount = 129000 if choice == 'bundle' else 69000
+    
+    # Формируем ID транзакции для себя: "ID_ПОЛЬЗОВАТЕЛЯ:ТОВАР"
+    merchant_trans_id = f"{user_id}:{choice}"
+    
+    # Генерируем ссылку для перехода
+    url = (
+        f"https://my.click.uz/services/pay"
+        f"?service_id={CLICK_CONFIG['service_id']}"
+        f"&merchant_id={CLICK_CONFIG['merchant_id']}"
+        f"&amount={amount}"
+        f"&transaction_param={merchant_trans_id}"
+    )
 
-    # Telegram принимает цены в минимальных единицах валюты (тийинах)
-    # 69000 UZS -> 6900000
-    prices = [LabeledPrice(label=title, amount=price * 100)]
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 CLICK orqali to'lash", url=url)],
+        [InlineKeyboardButton(text="⬅️ Orqaga", callback_data="get_welcome_message")]
+    ])
 
-    await callback.message.answer_invoice(
-        title=title,
-        description=description,
-        payload=choice, # ID товара, вернется в успешном платеже
-        provider_token=PROVIDER_TOKEN,
-        currency=CURRENCY,
-        prices=prices,
-        start_parameter="planner_payment"
+    await callback.message.answer(
+        f"Siz tanladingiz: {choice.capitalize()}\nTo'lov summasi: {amount:,} UZS\n\n"
+        "To'lovni amalga oshirish uchun tugmani bosing:",
+        reply_markup=kb
     )
     await callback.answer()
-
-# Обязательный ответ на предварительный запрос (проверка наличия товара)
-@router.pre_checkout_query()
-async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery):
-    await pre_checkout_query.answer(ok=True)
-
-# Обработка после успешной оплаты
-@router.message(F.successful_payment)
-async def process_successful_payment(message: Message):
-    payload = message.successful_payment.invoice_payload
-    # Здесь можно вызвать вашу функцию get_success_message(payload)
-    from utils.messages import get_success_message
-    
-    text = get_success_message(payload)
-    await message.answer(text)
