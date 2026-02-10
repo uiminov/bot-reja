@@ -40,7 +40,7 @@ async def process_buy(callback: CallbackQuery):
         photo_url=image_url,    # Изображение товара
         photo_size=512,         # Размер
         photo_width=512,
-        photo_height=512,
+        photo_height=280,
         start_parameter="planner_payment",
         need_name=False,        # Нам не нужны лишние данные клиента
         need_phone_number=False,
@@ -63,3 +63,4 @@ async def process_successful_payment(message: Message):
     # Отправляем сообщение со ссылками на скачивание
     text = get_success_message(payload)
     await message.answer(text, parse_mode="Markdown")
+
