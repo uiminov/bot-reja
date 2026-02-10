@@ -10,7 +10,7 @@ async def process_buy(callback: CallbackQuery):
     user_id = callback.from_user.id
     
     # Определяем цену
-    amount = 129000 if choice == 'bundle' else 69000
+    amount = 129000 if choice == 'bundle' else 1000
     
     # Формируем ID транзакции для себя: "ID_ПОЛЬЗОВАТЕЛЯ:ТОВАР"
     merchant_trans_id = f"{user_id}:{choice}"
@@ -35,3 +35,4 @@ async def process_buy(callback: CallbackQuery):
         reply_markup=kb
     )
     await callback.answer()
+
