@@ -15,33 +15,33 @@ async def show_product(callback: CallbackQuery):
     key = callback.data.split('_')[1]
 
     if key == 'bundle':
-        text = BUNDLE['description']
-        image_url = BUNDLE.get('image_url')
+        product_data = BUNDLE
         keyboard = get_bundle_keyboard()
     else:
-        text = PLANNERS[key]['description']
-        image_url = PLANNERS[key].get('image_url')
+        product_data = PLANNERS.get(key)
         keyboard = get_product_keyboard(key)
 
-    # Prefer rendering as photo + caption (as requested). Fallback to plain text if no image_url.
-    if image_url:
+    if not product_data:
+        return await callback.answer("Mahsulot topilmadi")
+
+    text = product_data['description']
+    image_url = product_data.get('image_url')
+
+    try:
+        # Пытаемся обновить сообщение с новым фото
         media = InputMediaPhoto(media=image_url, caption=text, parse_mode="MarkdownV2")
+        await callback.message.edit_media(media=media, reply_markup=keyboard)
+    except Exception as e:
+        print(f"Rasm yuklashda xato ({key}): {e}")
+        # Если фото не грузится (wrong type of content), просто отправляем текст
         try:
-            await callback.message.edit_media(media=media, reply_markup=keyboard)
-        except Exception:
-            # If current message is not editable into media (e.g., text message), send a new photo.
-            await callback.message.answer_photo(
-                photo=image_url,
-                caption=text,
-                parse_mode="MarkdownV2",
-                reply_markup=keyboard
-            )
-            try:
-                await callback.message.delete()
-            except Exception:
-                pass
-    else:
-        await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="MarkdownV2")
+            await callback.message.answer(text=text, parse_mode="MarkdownV2", reply_markup=keyboard)
+            await callback.message.delete()
+        except Exception as e2:
+            # Если даже текст не шлется, значит ошибка в Markdown символах
+            print(f"Markdown xatosi: {e2}")
+            await callback.message.answer(text="Tavsifda formatlash xatosi bor.")
+    
     await callback.answer()
 
 
