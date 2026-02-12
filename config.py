@@ -44,7 +44,7 @@ PLANNERS: Dict[str, Dict[str, Any]] = {
     },
     'productivity': {
         'title': 'Hosildorlik trekeri',
-        'image_url': 'https://i.postimg.cc/P5Zv11fQ/Planer-produktivnosti.png',
+        'image_url': 'https://i.postimg.cc/jdpVGMG5/Planer-produktivnosti.png',
         'description': (
             "*✦📊 Hosildorlik trekeri✦*\n\n"
             "> Samaradorligingizni yuqori darajaga ko‘taring \\! "
