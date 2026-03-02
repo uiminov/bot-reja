@@ -3,6 +3,7 @@ import os
 import asyncio
 import logging
 import psutil, os
+from utils.db import init_db
 
 process = psutil.Process(os.getpid())
 print(process.memory_info().rss / 1024 / 1024, "MB")
@@ -16,6 +17,10 @@ from config import BOT_TOKEN
 from handlers.subscription import router as subscription_router
 from handlers.payments import router as payments_router
 from handlers.navigation import router as navigation_router
+
+async def main():
+    init_db() # Создаем базу данных
+    # ... твой код запуска dp.start_polling(bot)
 
 async def main():
     logging.basicConfig(level=logging.WARNING)
@@ -36,4 +41,5 @@ async def main():
     )
 
 if __name__ == "__main__":
+
     asyncio.run(main())
