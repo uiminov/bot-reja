@@ -1,5 +1,5 @@
 import asyncio
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -12,29 +12,26 @@ router = Router()
 class AdminStates(StatesGroup):
     waiting_for_content = State()
 
-# Команда /broadcast — доступна только тебе и группе из ADMIN_ID
+# Команда для рассылки (доступна тебе и группе)
 @router.message(Command("broadcast"), F.from_user.id.in_(ADMIN_ID))
 async def start_broadcast(message: Message, state: FSMContext):
-    await message.answer("Отправь сообщение (текст/фото), которое нужно разослать всем:")
+    await message.answer("Введите сообщение для рассылки (текст или фото):")
     await state.set_state(AdminStates.waiting_for_content)
 
 @router.message(AdminStates.waiting_for_content, F.from_user.id.in_(ADMIN_ID))
-async def perform_broadcast(message: Message, state: FSMContext, bot: Bot):
+async def perform_broadcast(message: Message, state: FSMContext):
     await state.clear()
-    users = await db.get_all_users()
+    users = await db.get_all_users() # Получаем список из БД
     
-    success = 0
-    blocked = 0
-    
-    msg = await message.answer(f"⏳ Начинаю рассылку на {len(users)} чел...")
+    count = 0
+    await message.answer(f"🚀 Начинаю рассылку на {len(users)} пользователей...")
 
     for user_id in users:
         try:
-            # Копируем сообщение целиком
             await message.copy_to(chat_id=user_id)
-            success += 1
-            await asyncio.sleep(0.05) # чтобы телеграм не забанил
+            count += 1
+            await asyncio.sleep(0.05) # Пауза для защиты от бана
         except Exception:
-            blocked += 1
+            pass
 
-    await msg.edit_text(f"✅ Готово!\n👍 Получили: {success}\n👎 Заблокировали: {blocked}")
+    await message.answer(f"✅ Рассылка завершена! Получили: {count} чел.")
