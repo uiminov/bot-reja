@@ -1,4 +1,10 @@
-import sqlite3
+import os
+import os
+from datetime import datetime
+
+# Этот код найдет папку, где лежит сам файл db.py, и создаст базу там
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "bot_stats.db")
 from datetime import datetime
 
 DB_PATH = "bot_stats.db"
