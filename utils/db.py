@@ -9,7 +9,18 @@ def init_db():
     conn.commit()
     conn.close()
 
-async def add_user_if_not_exists(user_id):
+
+async def get_all_users():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    # Выбираем только колонку user_id
+    cursor.execute("SELECT user_id FROM users")
+    users = cursor.fetchall()
+    conn.close()
+    # Превращаем список кортежей [(123,), (456,)] в простой список [123, 456]
+    return [user[0] for user in users]
+    
+    async def add_user_if_not_exists(user_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
