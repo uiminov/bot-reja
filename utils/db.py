@@ -32,6 +32,6 @@ async def get_all_users():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT user_id FROM users")
-    users = cursor.fetchall()
+    users = [row[0] for row in cursor.fetchall()]
     conn.close()
-    return [user[0] for user in users]
+    return users
