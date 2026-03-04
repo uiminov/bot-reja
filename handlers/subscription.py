@@ -12,17 +12,14 @@ router = Router(name="subscription")
 @router.message(Command("start"))
 async def cmd_start(message: Message):
     user_id = message.from_user.id
-    
-    # --- ЛОГИКА СТАТИСТИКИ И УВЕДОМЛЕНИЯ В ГРУППУ ---
-    # Проверяем, новый ли это пользователь
     is_new = await db.add_user_if_not_exists(user_id)
     
     if is_new:
         try:
             total_users = await db.get_users_count()
-            # Отправляем уведомление в твою группу
+            # ПРАВКА ТУТ: берем ADMIN_ID[1], чтобы не было ошибки списка
             await message.bot.send_message(
-                chat_id=ADMIN_ID,
+                chat_id=ADMIN_ID[1], 
                 text=(
                     f"📈 *Yangi foydalanuvchi!*\n"
                     f"👤 Ism: {message.from_user.full_name}\n"
@@ -32,10 +29,8 @@ async def cmd_start(message: Message):
                 parse_mode="Markdown"
             )
         except Exception as e:
-            print(f"Admin guruhiga xabar yuborishda xatolik: {e}")
-    # -----------------------------------------------
+            print(f"Admin xabar yuborishda xatolik: {e}")
 
-    # Ответ пользователю
     await message.answer_photo(
         photo=OSNOVA['image_url'],
         caption=OSNOVA['description'],
@@ -69,3 +64,4 @@ async def is_subscribed_to_all(user_id: int, bot: Bot) -> bool:
             print(f"Tasdiqlashda xatolik {channel_id}: {e}")
             return False
     return True
+
