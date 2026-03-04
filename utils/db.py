@@ -1,13 +1,14 @@
 import os
-import os
+import sqlite3  # ОБЯЗАТЕЛЬНО ДОБАВИЛ
 from datetime import datetime
 
-# Этот код найдет папку, где лежит сам файл db.py, и создаст базу там
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# 1. Находим путь к папке utils и поднимаемся на уровень выше в корень проекта
+# Это гарантирует, что база всегда будет в одном и том же файле в корне бота
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "bot_stats.db")
-from datetime import datetime
 
-DB_PATH = "bot_stats.db"
+# Теперь эта строка покажет РЕАЛЬНЫЙ путь к файлу при запуске
+print(f"--- БАЗА ДАННЫХ ИСПОЛЬЗУЕТСЯ ТУТ: {DB_PATH} ---")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -33,7 +34,6 @@ async def get_users_count():
     conn.close()
     return count
 
-# ТА САМАЯ ФУНКЦИЯ (Проверьте, чтобы перед каждой строкой было 4 пробела)
 async def get_all_users():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
