@@ -7,21 +7,22 @@ from aiogram.fsm.state import State, StatesGroup
 from config import ADMIN_ID
 import utils.db as db
 
+# Обязательно эта строка!
 router = Router()
 
 class AdminStates(StatesGroup):
     waiting_for_content = State()
 
-# Команда для рассылки (доступна тебе и группе)
+# Проверь, что фильтр видит твой ID
 @router.message(Command("broadcast"), F.from_user.id.in_(ADMIN_ID))
 async def start_broadcast(message: Message, state: FSMContext):
-    await message.answer("Введите сообщение для рассылки (текст или фото):")
+    await message.answer("Введите сообщение для рассылки:")
     await state.set_state(AdminStates.waiting_for_content)
 
 @router.message(AdminStates.waiting_for_content, F.from_user.id.in_(ADMIN_ID))
 async def perform_broadcast(message: Message, state: FSMContext):
     await state.clear()
-    users = await db.get_all_users() # Получаем список из БД
+    users = await db.get_all_users()
     
     count = 0
     await message.answer(f"🚀 Начинаю рассылку на {len(users)} пользователей...")
@@ -30,8 +31,8 @@ async def perform_broadcast(message: Message, state: FSMContext):
         try:
             await message.copy_to(chat_id=user_id)
             count += 1
-            await asyncio.sleep(0.05) # Пауза для защиты от бана
+            await asyncio.sleep(0.05) # парим, чтобы не забанили
         except Exception:
             pass
 
-    await message.answer(f"✅ Рассылка завершена! Получили: {count} чел.")
+    await message.answer(f"✅ Готово! Получили: {count}")
