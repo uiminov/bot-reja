@@ -12,27 +12,29 @@ router = Router()
 class AdminStates(StatesGroup):
     waiting_for_content = State()
 
-# Вход в режим рассылки
+# Команда /broadcast — доступна только тебе и группе из ADMIN_ID
 @router.message(Command("broadcast"), F.from_user.id.in_(ADMIN_ID))
 async def start_broadcast(message: Message, state: FSMContext):
-    await message.answer("Отправь сообщение для рассылки (текст, фото или видео):")
+    await message.answer("Отправь сообщение (текст/фото), которое нужно разослать всем:")
     await state.set_state(AdminStates.waiting_for_content)
 
-# Сама рассылка
 @router.message(AdminStates.waiting_for_content, F.from_user.id.in_(ADMIN_ID))
-async def perform_broadcast(message: Message, state: FSMContext):
+async def perform_broadcast(message: Message, state: FSMContext, bot: Bot):
     await state.clear()
     users = await db.get_all_users()
     
-    success, blocked = 0, 0
-    await message.answer(f"⏳ Начинаю рассылку на {len(users)} чел...")
+    success = 0
+    blocked = 0
+    
+    msg = await message.answer(f"⏳ Начинаю рассылку на {len(users)} чел...")
 
     for user_id in users:
         try:
+            # Копируем сообщение целиком
             await message.copy_to(chat_id=user_id)
             success += 1
-            await asyncio.sleep(0.05) # Защита от бана Telegram
+            await asyncio.sleep(0.05) # чтобы телеграм не забанил
         except Exception:
             blocked += 1
 
-    await message.answer(f"✅ Рассылка окончена!\n👍 Получили: {success}\n👎 Заблокировали: {blocked}")
+    await msg.edit_text(f"✅ Готово!\n👍 Получили: {success}\n👎 Заблокировали: {blocked}")
