@@ -13,9 +13,11 @@ router = Router()
 class AdminStates(StatesGroup):
     waiting_for_content = State()
 
-# Проверь, что фильтр видит твой ID
-@router.message(Command("broadcast"), F.from_user.id.in_(ADMIN_ID))
+@router.message(Command("broadcast")) # УБРАЛИ ПРОВЕРКУ ID
 async def start_broadcast(message: Message, state: FSMContext):
+    # Эта строка покажет в логах КТО ПИШЕТ
+    print(f"!!! КТО-ТО ПИШЕТ: {message.from_user.id}")
+    
     await message.answer("Введите сообщение для рассылки:")
     await state.set_state(AdminStates.waiting_for_content)
 
