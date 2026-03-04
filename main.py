@@ -11,6 +11,7 @@ from config import BOT_TOKEN
 from handlers.subscription import router as subscription_router
 from handlers.payments import router as payments_router
 from handlers.navigation import router as navigation_router
+from handlers.admin import router as admin_router
 
 # Логирование памяти (опционально)
 process = psutil.Process(os.getpid())
@@ -31,6 +32,7 @@ async def main():
     dp.include_router(subscription_router)
     dp.include_router(payments_router)
     dp.include_router(navigation_router)
+    dp.include_router(admin_router)
 
     print("Бот запущен. Напиши /start")
 
@@ -49,3 +51,4 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Бот выключен вручную")
+
