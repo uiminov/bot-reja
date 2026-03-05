@@ -1,6 +1,6 @@
 from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery, Message
-from config import PROVIDER_TOKEN, CURRENCY, PLANNERS, BUNDLE
+from config import PROVIDER_TOKEN, CURRENCY, PLANNERS, BUNDLE, ADMIN_ID
 
 router = Router(name="payments")
 
@@ -56,11 +56,38 @@ async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery):
     await pre_checkout_query.answer(ok=True)
 
 @router.message(F.successful_payment)
-async def process_successful_payment(message: Message):
+async def process_successful_payment(message: Message, bot: Bot):
     payload = message.successful_payment.invoice_payload
     from utils.messages import get_success_message
     
     # Отправляем сообщение со ссылками на скачивание
     text = get_success_message(payload)
-    await message.answer(text, parse_mode="Markdown")
+    try:
+        await message.answer(text, parse_mode="Markdown")
+    except Exception:
+        # Если Markdown не сработал, отправляем без форматирования
+        await message.answer(text)
+    
+    # Отправляем уведомление в группу админов
+    try:
+        user = message.from_user
+        product_name = BUNDLE['title'] if payload == 'bundle' else PLANNERS.get(payload, {}).get('title', payload)
+        amount = message.successful_payment.total_amount / 100  # Конвертируем из тийинов
+        
+        admin_notification = (
+            f"💰 *НОВАЯ ПОКУПКА!*\n\n"
+            f"👤 Покупатель: {user.full_name}\n"
+            f"🆔 ID: `{user.id}`\n"
+            f"📦 Товар: {product_name}\n"
+            f"💵 Сумма: {amount:,.0f} UZS"
+        )
+        
+        # Отправляем в первый ADMIN_ID (группа)
+        await bot.send_message(
+            chat_id=ADMIN_ID[0],
+            text=admin_notification,
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        print(f"[PAYMENT] Ошибка при отправке уведомления админу: {e}")
 

@@ -7,6 +7,7 @@ from handlers.subscription import router as subscription_router
 from handlers.payments import router as payments_router
 from handlers.navigation import router as navigation_router
 from handlers.admin import router as admin_router
+from handlers.promotion import router as promotion_router
 
 async def main():
     init_db()
@@ -17,6 +18,7 @@ async def main():
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher()
 
+    dp.include_router(promotion_router)
     dp.include_router(admin_router) 
     dp.include_router(subscription_router)
     dp.include_router(payments_router)

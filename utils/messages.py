@@ -2,9 +2,21 @@ from config import OSNOVA, PLANNERS, BUNDLE
 
 
 def get_success_message(payload: str) -> str:
+    # Обработка bundle (обычная покупка)
     if payload == 'bundle':
         lines = ["🎉 Aksiyani sotib olganingiz uchun rahmat!", "", "Mana uchta planeringiz (2 narxiga):"]
         for key in BUNDLE['planners']:
+            p = PLANNERS[key]
+            lines.append(f"📊 {p['title']}")
+            lines.append(p['link'])
+            lines.append("")
+        lines.append("Har bir havolaga bosing → yuqori o'ng burchakda «Nusxa yaratish»")
+        return "\n".join(lines)
+    
+    # Обработка bundle_deal (акция из промо)
+    if payload == 'bundle_deal':
+        lines = ["🎉 Aksiyani sotib olganingiz uchun rahmat!", "", "Mana uchta planeringiz:"]
+        for key in ['financial', 'task', 'productivity']:
             p = PLANNERS[key]
             lines.append(f"📊 {p['title']}")
             lines.append(p['link'])

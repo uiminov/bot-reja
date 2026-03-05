@@ -1,9 +1,9 @@
 from typing import Dict, Any
 
 
-BOT_TOKEN = '8118513719:AAHOtzF2EeW6uySSH0xIgiwfgax0skSrFuc'
-PROVIDER_TOKEN = '333605228:LIVE:55254_6E6BFB0FBFB5D592A8E9CE3F19DE47B44451F844'
-ADMIN_ID = [-5299954879, 892260845]
+BOT_TOKEN = '8269216370:AAG_is5dpzkL_7xm-fN0qRHTr1cmwBKjieU'
+PROVIDER_TOKEN = '398062629:TEST:999999999_F91D8F69C042267444B74CC0B3C747757EB0E065'
+ADMIN_ID = [-5086758296, 892260845]
 
 # Твои данные из вопроса
 CLICK_CONFIG = {
@@ -65,7 +65,7 @@ BUNDLE = {
         "*✦🔥 2 ta puliga 3 ta oling ✦*\n\n"
             "> Hozirdan foydalaning — bu imkoniyatni qo‘ldan boy bermang \\! "
             "Aksiya muddati cheklangan \\.\n\n"
-            "▪️*Narxi:* 129\\.000 UZS\n\n"
+            "▪️*Narxi:* 99\\.000 UZS\n\n"
              "_Bir marta toʻlaysiz — cheklovlarsiz foydalanasiz_"
     ),
     'price': 129000,
